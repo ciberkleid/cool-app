@@ -2,7 +2,7 @@
 applications:
   - name: cool-app
     memory: 1G
-    path: target/cool-app-0.0.1-SNAPSHOT.jar
+    path: target/cool-app-1.0.0.jar
     random-route: true
 #    routes:
 #      - route: cool-app.apps.pcfone.io

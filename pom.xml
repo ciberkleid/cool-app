@@ -55,33 +55,41 @@
                         <plugin>
                                 <groupId>org.springframework.boot</groupId>
                                 <artifactId>spring-boot-maven-plugin</artifactId>
+                                <configuration>
+                                        <image>
+                                                <name>${project.artifactId}:${project.version}-boot</name>
+                                        </image>
+                                </configuration>
                         </plugin>
                 </plugins>
         </build>
 
         <profiles>
                 <profile>
-                        <id>dockerhub</id>
+                        <id>jib</id>
                         <build>
                                 <plugins>
                                         <plugin>
                                                 <groupId>com.google.cloud.tools</groupId>
                                                 <artifactId>jib-maven-plugin</artifactId>
-                                                <version>2.0.0</version>
-                                                <configuration>
-                                                        <to>
-                                                                <image>spring-sample-app</image>
-                                                                <tags>${project.version}</tags>
-                                                        </to>
-                                                </configuration>
-                                                <executions>
-                                                        <execution>
-                                                                <phase>package</phase>
-                                                                <goals>
-                                                                        <goal>dockerBuild</goal>
-                                                                </goals>
-                                                        </execution>
-                                                </executions>
+                                                <version>2.1.0</version>
+<!--                                                <configuration>-->
+<!--                                                        <to>-->
+<!--                                                                <image>${project.name}</image>-->
+<!--                                                                <tags>${project.version}-jib</tags>-->
+<!--                                                        </to>-->
+<!--                                                        <to>-->
+<!--                                                                <image>${project.artifactId}:${project.version}-jib</image>-->
+<!--                                                        </to>-->
+<!--                                                </configuration>-->
+<!--                                                <executions>-->
+<!--                                                        <execution>-->
+<!--                                                                <phase>package</phase>-->
+<!--                                                                <goals>-->
+<!--                                                                        <goal>dockerBuild</goal>-->
+<!--                                                                </goals>-->
+<!--                                                        </execution>-->
+<!--                                                </executions>-->
                                         </plugin>
                                 </plugins>
                         </build>

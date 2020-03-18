@@ -4,7 +4,13 @@ This is a simple demo app that returns one of several "cool expressions" at rand
 
 ## Build the image
 
-Choose one of the following methods to build an image from the source code.
+Choose one of the following methods to build an image from the source code:
+[Dockerfile](README.md#dockerfile)
+[Jib](README.md#jib)
+[Spring Boot Maven Plugin](README.md#spring-boot-maven-plugin)
+[Pack](README.md#pack)
+
+After building the image, [test the app locally](README.md#test-the-app-locally).
 
 ### Dockerfile
 

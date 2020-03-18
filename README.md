@@ -75,12 +75,13 @@ Install the [pack CLI](https://buildpacks.io/docs/install-pack/).
 Build the image & publish to the local Docker daemon:
 ```
 pack build cool-app:1.0.0-pack --builder cloudfoundry/cnb:bionic
+docker images | grep cool
 ```
 
 Alternatively, build the image & publish to DockerHub (user your org name instead of the example below):
 ```
 docker login # enter your username and password at the prompts
-pack build ciberkleid/cool-app:1.0.0-pack --builder cloudfoundry/cnb:bionic
+pack build ciberkleid/cool-app:1.0.0-pack --builder cloudfoundry/cnb:bionic --publish
 ```
 
 ## Test the app locally
@@ -92,13 +93,16 @@ docker images | grep cool
 
 In one terminal window, start the app. Replace `TAG_SUFFIX` with the appropriate value as shown in the list of images returned by the previous command:
 ```
-docker run -d -p 8080:8080 cool-app:1.0.0-TAG_SUFFIX
+container_id=`docker run -d -p 8080:8080 cool-app:1.0.0-TAG_SUFFIX`
 ```
-You'll get a container id as output, which you will use in the next step.
+The `docker run` command returns the id of the running container, which we are storing in a variable. You can also run `docker ps` to see the running containers.
 
 Send a request to the app. You should see a "cool" quote is returned.
 ```
 curl http://localhost:8080; echo
 ```
 
-Stop the app using `docker stop <container_id>`, where the id is the first few characters of id that was returned when you started the app.
+Stop the app container using the container_id we captured when starting the app:
+```
+docker stop $container_id
+```

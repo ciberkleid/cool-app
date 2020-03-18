@@ -60,6 +60,14 @@
                                                 <name>${project.artifactId}:${project.version}-boot</name>
                                         </image>
                                 </configuration>
+                                <executions>
+                                        <execution>
+                                                <goals>
+                                                        <!-- Add build info in actuator info endpoint -->
+                                                        <goal>build-info</goal>
+                                                </goals>
+                                        </execution>
+                                </executions>
                         </plugin>
                 </plugins>
         </build>

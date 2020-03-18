@@ -2,7 +2,7 @@
 
 This is a simple demo app that returns one of several "cool expressions" at random.
 
-This README contains instructions for [building the image](README.md#test-the-app-locally) and [testing the app locally](README.md#build-the-image).
+This README contains instructions for [building the image](README.md#build-the-image) and [testing the app locally](README.md#test-the-app-locally).
 
 ## Build the image
 

@@ -1,0 +1,14 @@
+FROM maven:3.6.3-jdk-11-openj9 AS build
+WORKDIR /app
+# Copy pom.xml and install dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
+# Copy source and build artifact
+COPY src/ src/
+RUN mvn clean package -DskipTests
+
+FROM gcr.io/distroless/java:11
+COPY --from=build /app/target/*.jar /app.jar
+# Image ENTRYPOINT is "java -jar", supply path to jar in CMD
+CMD ["/app.jar"]
+

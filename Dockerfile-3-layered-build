@@ -1,0 +1,35 @@
+# Multi-stage build using minimal final image
+# Separate handling of dependencies (pom.xml) and source to
+#   maximize layer re-use
+
+# Build a layered jar to maximize re-use of layers inside jar during mvn build
+# Copy exploded layers to final image for faster startup
+
+#ARG MAVEN_VERSION=3.6.3
+#ARG USER_HOME_DIR="/root"
+#ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+#ARG JAVA_VERSION=11
+
+FROM maven:3.6.3-jdk-11-openj9 AS build
+WORKDIR /app/build
+# Copy pom.xml and install dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
+# Copy source and build artifact
+COPY src/ src/
+RUN mvn clean package -DskipTests -P layered
+WORKDIR /app
+# Use mkdir to ensure all dirs exist so that COPY operation in next stage succeeds
+RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application \
+    && java -Djarmode=layertools -jar /app/build/target/*.jar extract
+
+#From Spring Boot Phil Webb guide, for last base image:
+#FROM adoptopenjdk:11-jre-hotspot
+FROM gcr.io/distroless/java:11
+WORKDIR app
+COPY --from=build /app/dependencies/ ./
+COPY --from=build /app/spring-boot-loader/ ./
+COPY --from=build /app/snapshot-dependencies/ ./
+COPY --from=build /app/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+

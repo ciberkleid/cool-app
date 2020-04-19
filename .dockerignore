@@ -1,0 +1,8 @@
+# Exclude everything by default
+*
+
+# Include what is needed to build
+!src/
+!pom.xml
+
+

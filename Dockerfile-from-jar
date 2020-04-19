@@ -1,0 +1,6 @@
+# Make sure .dockerignore does not exclude target/cool-app-1.0.0.jar
+
+FROM adoptopenjdk:11-jre-hotspot
+WORKDIR /app
+COPY target/cool-app-1.0.0.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

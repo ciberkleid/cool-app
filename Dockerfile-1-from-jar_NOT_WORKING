@@ -8,5 +8,10 @@
 
 FROM adoptopenjdk:11-jre-hotspot
 COPY target/*.jar app.jar
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar /app.jar ${0} ${@}"]
+#ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar /app.jar ${0} ${@}"]
+# Alternative ENTRYPOINT using script:
+RUN echo "#!/bin/sh" > run.sh && \
+    echo "exec java ${JAVA_OPTS} -jar /app.jar ${@}" >> run.sh && \
+    chmod +x run.sh
+ENTRYPOINT ["./run.sh"]
 

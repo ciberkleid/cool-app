@@ -4,5 +4,6 @@
 # Include what is needed to build
 !src/
 !pom.xml
+!target/*.jar
 
 

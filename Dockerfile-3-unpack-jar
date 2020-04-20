@@ -1,0 +1,27 @@
+FROM maven:3.6.3-jdk-11-openj9 AS build
+WORKDIR /app
+# Copy pom.xml and install dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
+# Copy source and build artifact
+COPY src/ src/
+RUN mvn clean package -DskipTests
+WORKDIR /app/target/dependency
+RUN jar -xf ../*.jar
+
+FROM adoptopenjdk:11-jre-hotspot
+ARG DEPENDENCY=/app/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/org /app/org
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp app:app/lib/* org.springframework.boot.loader.JarLauncher ${0} ${@}"]
+# Or for faster startup, specify main application class, comment out COPY to /app/org and use:
+#ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp app:app/lib/* io.pivotal.coolapp.CoolAppApplication ${0} ${@}"]
+
+## OR using a distroless image (no shell):
+#FROM gcr.io/distroless/java:11
+#ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+# OR
+#ENTRYPOINT ["java","-cp","app:app/lib/*","io.pivotal.coolapp.CoolAppApplication"]
+

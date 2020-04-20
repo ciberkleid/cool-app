@@ -20,6 +20,7 @@ COPY src/ src/
 RUN mvn clean package -DskipTests -P layered
 WORKDIR /app
 # Use mkdir to ensure all dirs exist so that COPY operation in next stage succeeds
+# Spring Boot 2.3.0.RC1 will correct this issue and make sure all dirs exist, even if empty
 RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application \
     && java -Djarmode=layertools -jar /app/build/target/*.jar extract
 

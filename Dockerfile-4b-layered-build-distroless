@@ -12,19 +12,19 @@ WORKDIR /app/target/dependency
 RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application \
     && java -Djarmode=layertools -jar ../*.jar extract
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM gcr.io/distroless/java:11
 ARG DEPENDENCY=/app/target/dependency
 COPY --from=build ${DEPENDENCY}/dependencies/ ./app
 COPY --from=build ${DEPENDENCY}/spring-boot-loader/ ./app
 COPY --from=build ${DEPENDENCY}/snapshot-dependencies/ ./app
 COPY --from=build ${DEPENDENCY}/application/ ./app
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp app:app/lib/* org.springframework.boot.loader.JarLauncher ${0} ${@}"]
+ENTRYPOINT ["java", "-cp", "app:app/lib/*", "org.springframework.boot.loader.JarLauncher"]
 
 
 # To run with JVM options and command-line args:
-#   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
-# OR
 #   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app --server.port=8081
 #   http localhost:8081 # In a different window
 #   <Ctrl+C> in container process window to stop container
+
+
 

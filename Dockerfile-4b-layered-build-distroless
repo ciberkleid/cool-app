@@ -1,16 +1,20 @@
-FROM maven:3.6.3-jdk-11-openj9 AS build
+# Sample command
+#   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app --server.port=8081
+
+FROM adoptopenjdk:11-jdk-hotspot AS build
 WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw mvnw
 # Copy pom.xml and install dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN ./mvnw dependency:go-offline
 # Copy source and build artifact
 COPY src/ src/
 RUN mvn clean package -DskipTests -P layered
 WORKDIR /app/target/dependency
-# Use mkdir to ensure all dirs exist so that COPY operation in next stage succeeds
-# Spring Boot 2.3.0.RC1 will correct this issue and make sure all dirs exist, even if empty
-RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application \
-    && java -Djarmode=layertools -jar ../*.jar extract
+# Can delete RUN mkdir line starting with Spring Boot 2.3.0.RC1
+RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application
+RUN java -Djarmode=layertools -jar ../*.jar extract
 
 FROM gcr.io/distroless/java:11
 ARG DEPENDENCY=/app/target/dependency
@@ -18,13 +22,6 @@ COPY --from=build ${DEPENDENCY}/dependencies/ ./app
 COPY --from=build ${DEPENDENCY}/spring-boot-loader/ ./app
 COPY --from=build ${DEPENDENCY}/snapshot-dependencies/ ./app
 COPY --from=build ${DEPENDENCY}/application/ ./app
+USER nonroot
 ENTRYPOINT ["java", "-cp", "app:app/lib/*", "org.springframework.boot.loader.JarLauncher"]
-
-
-# To run with JVM options and command-line args:
-#   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app --server.port=8081
-#   http localhost:8081 # In a different window
-#   <Ctrl+C> in container process window to stop container
-
-
 

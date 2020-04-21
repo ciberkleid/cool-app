@@ -1,21 +1,30 @@
-FROM maven:3.6.3-jdk-11-openj9 AS build
+# Sample command
+#   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
+
+FROM adoptopenjdk:11-jdk-hotspot AS build
 WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw mvnw
 # Copy pom.xml and install dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN ./mvnw dependency:go-offline
 # Copy source and build artifact
 COPY src/ src/
-RUN mvn clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 FROM adoptopenjdk:11-jre-hotspot
-COPY --from=build /app/target/*.jar /app.jar
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar /app.jar ${0} ${@}"]
+COPY --from=build /app/target/*.jar app.jar
+USER 1002
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]
 
 
-# To run with JVM options and command-line args:
-#   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
-# OR
-#   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app --server.port=8081
-#   http localhost:8081 # In a different window
-#   <Ctrl+C> in container process window to stop container
-
+############################################
+## Alternative, using distroless base image:
+## Sample command
+##   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app /app.jar --server.port=8081
+#
+#FROM gcr.io/distroless/java:11
+#COPY --from=build /app/target/*.jar /app.jar
+#USER nonroot
+#CMD ["/app.jar"]
+############################################

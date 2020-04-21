@@ -2,8 +2,9 @@
 *
 
 # Include what is needed to build
-!src/
+!.mvn/
+!mvnw
 !pom.xml
+!src/
 !target/*.jar
-
 

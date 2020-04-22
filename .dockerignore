@@ -1,10 +1,14 @@
-# Exclude everything by default
+### Exclude everything by default
 *
 
-# Include what is needed to build
+### Include what is needed to build image
+
+# From jar
+!target/*.jar
+
+# From source
 !.mvn/
 !mvnw
 !pom.xml
 !src/
-!target/*.jar
-
+!.m2/

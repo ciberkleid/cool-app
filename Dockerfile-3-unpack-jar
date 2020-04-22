@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:experimental
+
 # Sample command
 #   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
 
@@ -5,23 +7,21 @@ FROM adoptopenjdk:11-jdk-hotspot AS build
 WORKDIR /app
 COPY .mvn .mvn
 COPY mvnw mvnw
-# Copy pom.xml and install dependencies
 COPY pom.xml .
-RUN ./mvnw dependency:go-offline
-# Copy source and build artifact
 COPY src/ src/
-RUN ./mvnw clean package -DskipTests
+RUN --mount=type=bind,source=./.m2/repository,target=/root/.m2/repository,rw ./mvnw clean package -DskipTests
 WORKDIR /app/target/dependency
 RUN jar -xf ../*.jar
 
 FROM adoptopenjdk:11-jre-hotspot
+WORKDIR /app
 ARG DEPENDENCY=/app/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/org /app/org
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib lib
+COPY --from=build ${DEPENDENCY}/META-INF META-INF
+COPY --from=build ${DEPENDENCY}/org org
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes .
 USER 1002
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp app:app/lib/* org.springframework.boot.loader.JarLauncher ${0} ${@}"]
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp .:lib/* org.springframework.boot.loader.JarLauncher ${0} ${@}"]
 
 ############################################
 ## Alternative, using distroless base image:
@@ -29,11 +29,12 @@ ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -cp app:app/lib/* org.springfram
 ##   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app /app.jar --server.port=8081
 #
 #FROM gcr.io/distroless/java:11
+#WORKDIR /app
 #ARG DEPENDENCY=/app/target/dependency
-#COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-#COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-#COPY --from=build ${DEPENDENCY}/org /app/org
-#COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+#COPY --from=build ${DEPENDENCY}/BOOT-INF/lib lib
+#COPY --from=build ${DEPENDENCY}/META-INF META-INF
+#COPY --from=build ${DEPENDENCY}/org org
+#COPY --from=build ${DEPENDENCY}/BOOT-INF/classes .
 #USER nonroot
-#ENTRYPOINT ["java", "-cp", "app:app/lib/*", "org.springframework.boot.loader.JarLauncher"]
+#ENTRYPOINT ["java", "-cp", ".:lib/*", "org.springframework.boot.loader.JarLauncher"]
 ############################################

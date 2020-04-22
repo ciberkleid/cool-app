@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:experimental
+
 # Sample command
 #   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
 
@@ -5,14 +7,14 @@ FROM adoptopenjdk:11-jdk-hotspot AS build
 WORKDIR /app
 COPY .mvn .mvn
 COPY mvnw mvnw
-# Copy pom.xml and install dependencies
 COPY pom.xml .
-RUN ./mvnw dependency:go-offline
-# Copy source and build artifact
 COPY src/ src/
-RUN ./mvnw clean package -DskipTests
+# --mount=type=bind will always use mounted files (populate <build-context>/.m2 before executing 'docker build')
+# rw: writes allowed, but will be discarded
+RUN --mount=type=bind,source=./.m2/repository,target=/root/.m2/repository,rw ./mvnw clean package -DskipTests
 
 FROM adoptopenjdk:11-jre-hotspot
+WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 USER 1002
 ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]
@@ -24,7 +26,8 @@ ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]
 ##   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app /app.jar --server.port=8081
 #
 #FROM gcr.io/distroless/java:11
-#COPY --from=build /app/target/*.jar /app.jar
+#WORKDIR /app
+#COPY --from=build /app/target/*.jar app.jar
 #USER nonroot
-#CMD ["/app.jar"]
+#CMD ["app.jar"]
 ############################################

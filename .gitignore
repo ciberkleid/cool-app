@@ -1,6 +1,7 @@
 # Miscellaneous
 .DS_Store
 target/
+.m2/
 
 #InteliiJ
 .idea/

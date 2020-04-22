@@ -1,6 +1,5 @@
 # ENTRYPOINT supports Ctrl+C, JAVA_OPTS, and command line args
-# e.g. docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
-
+#   e.g. docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
 # In contrast:
 #ENTRYPOINT java -jar app.jar --> Ctrl+C, JAVA_OPTS, command args ignored
 #ENTRYPOINT ["java", "-jar"]

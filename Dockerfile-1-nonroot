@@ -6,10 +6,10 @@
 FROM adoptopenjdk:11-jre-hotspot
 WORKDIR /app
 USER 1002
-RUN touch /app/user_file || true;   # Expecting failure
 RUN touch /tmp/user_file || true;   # Expecting success
+RUN touch /app/user_file || true;   # Expecting failure
 COPY target/*.jar app.jar
-RUN echo "app files:" && ls -ltra /app && \
-    echo "tmp files:" && ls -ltra /tmp
+RUN echo "tmp files:" && ls -ltra /tmp && \
+    echo "app files:" && ls -ltra /app
 ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]
 

@@ -3,7 +3,9 @@
 # Sample command
 #   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
 
-FROM adoptopenjdk:11-jdk-hotspot AS build
+ARG JAVA_VERSION=11
+
+FROM adoptopenjdk:${JAVA_VERSION}-jdk-hotspot AS build
 WORKDIR /app
 COPY .mvn .mvn
 COPY mvnw mvnw
@@ -15,7 +17,7 @@ WORKDIR /app/target/dependency
 RUN mkdir -p dependencies spring-boot-loader snapshot-dependencies application \
     && java -Djarmode=layertools -jar ../*.jar extract
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM adoptopenjdk:${JAVA_VERSION}-jre-hotspot
 WORKDIR /app
 ARG DEPENDENCY=/app/target/dependency
 COPY --from=build ${DEPENDENCY}/dependencies/ .

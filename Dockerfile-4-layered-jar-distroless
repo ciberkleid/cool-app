@@ -3,8 +3,8 @@
 # Sample command
 #   docker run -p 8081:8081 -e "JAVA_TOOL_OPTIONS=-Ddebug -Xmx128m" cool-app --server.port=8081
 
-ARG MAVEN_VERSION=3.6.3
 ARG JAVA_VERSION=11
+ARG MAVEN_VERSION=3.6.3
 
 FROM maven:${MAVEN_VERSION}-jdk-${JAVA_VERSION}-openj9 AS build
 WORKDIR /app

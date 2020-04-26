@@ -1,6 +1,7 @@
 # Sample command
 #   docker run -p 8081:8081 -e "JAVA_OPTS=-Ddebug -Xmx128m" cool-app --server.port=8081
 
+# Could be even more specific with image names: 11.0.4_11-jre-hotspot-bionic, or us SHA
 ARG JAVA_VERSION=11
 
 FROM adoptopenjdk:${JAVA_VERSION}-jdk-hotspot AS build

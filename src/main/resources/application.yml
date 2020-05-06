@@ -1,3 +1,22 @@
+spring:
+  application:
+    name: cool-app
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Spring Boot demo application
+    profiles: ${spring.profiles.active:default}
+  # build properties from maven
+  build:
+    name: @project.name@
+    artifact: @project.groupId@:@project.artifactId@:@project.version@
+    parent: @project.parent.groupId@:@project.parent.artifactId@:@project.parent.version@
+  # environment variables
+  runtime:
+    name: ${java.runtime.name}
+    version: ${java.runtime.version}
+
 management:
   endpoints:
     web:
@@ -6,3 +25,4 @@ management:
   endpoint:
     shutdown:
       enabled: true   # curl -X POST localhost:8080/actuator/shutdown
+

@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:experimental
+
+# Build with --mount=type=cache:
+#   docker build . -t cool-app -f Dockerfile-2c
+# Build with --mount=type=bind:
+#   ./mvnw -Dmaven.repo.local=./.m2/repository dependency:go-offline
+#   docker build . -t cool-app -f Dockerfile-2c --build-arg M2_MOUNT_TYPE=bind
+
+FROM adoptopenjdk:11-jdk-hotspot AS build-with-m2-cache
+WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw mvnw
+COPY pom.xml .
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw dependency:go-offline
+COPY src/ src/
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw clean package -DskipTests --offline
+
+FROM adoptopenjdk:11-jdk-hotspot AS build-with-m2-bind
+LABEL org.opencontainers.image.authors="me@example.com"
+WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw mvnw
+COPY pom.xml .
+COPY src/ src/
+RUN --mount=type=bind,source=./.m2/repository,target=/root/.m2/repository,rw \
+    ./mvnw clean package -DskipTests --offline
+
+FROM build-with-m2-${M2_MOUNT_TYPE} AS build
+
+FROM adoptopenjdk:11-jre-hotspot AS release
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+USER 1002
+CMD ["java", "-jar", "app.jar"]

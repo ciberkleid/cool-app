@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:experimental
+
+FROM adoptopenjdk:11-jdk-hotspot AS build
+WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw mvnw
+COPY pom.xml .
+COPY src/ src/
+RUN --mount=type=bind,source=./.m2/repository,target=/root/.m2/repository,rw \
+    ./mvnw clean package -DskipTests --offline
+
+FROM adoptopenjdk:11-jre-hotspot AS release
+LABEL org.opencontainers.image.authors="me@example.com"
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+USER 1002
+CMD ["java", "-jar", "app.jar"]

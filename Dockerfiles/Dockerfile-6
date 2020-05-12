@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw dependency:go-offline
 COPY src/ src/
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw clean package -DskipTests --offline -P layered
+    ./mvnw clean package -DskipTests --offline
 WORKDIR /app/target/dependency
 RUN java -Djarmode=layertools -jar ../*.jar extract
 # Temporary workaround to open issue

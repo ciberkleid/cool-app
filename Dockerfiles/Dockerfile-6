@@ -13,8 +13,6 @@ RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw clean package -DskipTests --offline
 WORKDIR /workspace/target/dependency
 RUN java -Djarmode=layertools -jar ../*.jar extract
-# Temporary workaround to open issue
-RUN mkdir -p snapshot-dependencies
 
 FROM gcr.io/distroless/java:${JAVA_VERSION} AS release
 LABEL org.opencontainers.image.authors="me@example.com"

@@ -74,6 +74,10 @@
                             <image>
                                 <name>ciberkleid/${project.artifactId}:${project.version}</name>
                             </image>
+                            <environmentVariables>
+                                <!--Image Labels: see https://github.com/paketo-buildpacks/image-labels-->
+                                <BP_OCI_AUTHORS>me@example.com</BP_OCI_AUTHORS>
+                            </environmentVariables>
                             <layers>
                                 <enabled>true</enabled>
                             </layers>

@@ -1,5 +1,5 @@
 FROM adoptopenjdk:11-jdk-hotspot AS build
-WORKDIR /app
+WORKDIR /workspace
 COPY .mvn .mvn
 COPY mvnw mvnw
 COPY pom.xml .
@@ -9,7 +9,7 @@ RUN ./mvnw clean package -DskipTests --offline
 
 FROM adoptopenjdk:11-jre-hotspot
 LABEL org.opencontainers.image.authors="me@example.com"
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+WORKDIR /workspace
+COPY --from=build /workspace/target/*.jar app.jar
 USER 1002
 CMD ["java", "-jar", "app.jar"]

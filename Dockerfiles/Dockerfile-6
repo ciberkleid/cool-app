@@ -4,22 +4,22 @@ ARG JAVA_VERSION=11
 ARG MAVEN_VERSION=3.6.3
 
 FROM maven:${MAVEN_VERSION}-jdk-${JAVA_VERSION}-openj9 AS build
-WORKDIR /app
+WORKDIR /workspace
 COPY pom.xml .
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw dependency:go-offline
 COPY src/ src/
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw clean package -DskipTests --offline
-WORKDIR /app/target/dependency
+WORKDIR /workspace/target/dependency
 RUN java -Djarmode=layertools -jar ../*.jar extract
 # Temporary workaround to open issue
 RUN mkdir -p snapshot-dependencies
 
 FROM gcr.io/distroless/java:${JAVA_VERSION} AS release
 LABEL org.opencontainers.image.authors="me@example.com"
-WORKDIR /app
-ARG DEPENDENCY=/app/target/dependency
+WORKDIR /workspace
+ARG DEPENDENCY=/workspace/target/dependency
 COPY --from=build ${DEPENDENCY}/dependencies/ .
 COPY --from=build ${DEPENDENCY}/spring-boot-loader/ .
 COPY --from=build ${DEPENDENCY}/snapshot-dependencies/ .

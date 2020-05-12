@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:experimental
+
+FROM adoptopenjdk:11-jdk-hotspot AS build
+WORKDIR /workspace
+COPY ../.mvn .mvn
+COPY ../mvnw mvnw
+COPY ../pom.xml .
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw dependency:go-offline
+COPY ../src src/
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw clean package -DskipTests --offline
+
+FROM adoptopenjdk:11-jre-hotspot AS release
+LABEL org.opencontainers.image.authors="me@example.com"
+WORKDIR /workspace
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+COPY --from=build /workspace/target/*.jar app.jar
+USER 1002
+ENTRYPOINT ["/tini", "-g", "--", "sh", "-c", "java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]
